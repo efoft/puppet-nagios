@@ -1,0 +1,20 @@
+[/modules]
+CheckSystem=enabled
+CheckDisk=enabled
+CheckEventLog=enabled
+CheckExternalScripts=enabled
+NRPEServer=enabled
+
+[/settings/default]
+allowed hosts = <%= @servers.join(',') %>
+
+[/settings/NRPE/server]
+use ssl = false
+allow arguments = true
+allow nasty characters = false
+port = 5666
+
+[/settings/external scripts/alias]
+alias_memory = check_memory "warn=free < 10%" "crit=free < 5%"
+alias_space = check_drivesize "warn=free < 10%" "crit=free < 5%" drive=* "filter=type in ('fixed') and mounted=1"
+alias_eventlog = check_eventlog <% @win_eventlog_files.each do | file | %>file=<%= file %> <% end %>  unique scan-range=-3h
