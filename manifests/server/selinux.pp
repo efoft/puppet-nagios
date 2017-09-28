@@ -7,4 +7,6 @@ class nagios::server::selinux(
   package { $selinux_package:
     ensure => $::nagios::server::install::package_ensure
   }
+
+  ensure_resource('selboolean','daemons_enable_cluster_mode', {'value' => 'on', 'persistent' => true})
 }
