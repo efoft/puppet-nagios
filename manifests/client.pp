@@ -38,6 +38,8 @@ class nagios::client(
   $imap               = false,
   $pop                = false,
   $http               = false,
+  $bacula             = false,
+  $bacula_pass        = undef,
   ## end of common checks
   ## specific linux checks
   $mysql_local        = false,
@@ -91,6 +93,15 @@ class nagios::client(
     ensure  => $file_ensure,
     content => template("nagios/${nrpe_cfg_template}"),
     notify  => Service[$nagios::params::nrpe_service],
+    require => Package[$nagios::params::nrpe_package],
+  }
+
+  # Include dir
+  file { $nrpe_include_dir:
+    ensure  => $package_ensure ? { 'present' => 'directory', 'absent' => 'absent' },
+    recurse => true,
+    force   => true,
+    purge   => true,
     require => Package[$nagios::params::nrpe_package],
   }
 

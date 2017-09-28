@@ -87,8 +87,9 @@ class nagios::client::checks::linux {
     # Updates
     if $nagios::client::updates {
       nagios::client::nrpe_check { 'updates':
-        package_name => 'nagios-plugins-check-updates',
-        description => 'System Up-to-date',
+        package_name   => 'nagios-plugins-check-updates',
+        local_cmd_args => '--security-only -t 30',
+        description    => 'System Up-to-date',
       }
     }
 
@@ -97,6 +98,33 @@ class nagios::client::checks::linux {
       nagios::client::network_check { 'ssh': }
     }
   } # end of defaultchecks
+
+  # Bacula
+  if $nagios::client::bacula {
+    if ! $nagios::client::bacula_pass {
+      fail('Parameter bacula_pass is required for bacula monitoring.')
+    }
+
+    nagios::plugin { 'bacula': }
+    nagios::client::nrpe_command { 'bacula':
+      args    => '-H localhost -D $ARG1$ -M bacula-mon -K $ARG2$',
+    }
+    nagios::client::service { 'bacula_dir':
+      command     => 'check_nrpe_bacula',
+      args        => "!dir!${nagios::client::bacula_pass}",
+      description => 'Bacula Director',
+    }
+    nagios::client::service { 'bacula_sd':
+      command     => 'check_nrpe_bacula',
+      args        => "!sd!${nagios::client::bacula_pass}",
+      description => 'Bacula Storage',
+    }
+    nagios::client::service { 'bacula_fd':
+      command     => 'check_nrpe_bacula',
+      args        => "!fd!${nagios::client::bacula_pass}",
+      description => 'Bacula File Daemon',
+    }
+  }
 
   # MySQL
   if $nagios::client::mysql_local or $nagios::client::mysql_remote {

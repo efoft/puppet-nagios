@@ -187,6 +187,9 @@ class nagios::server::commands(
   nagios_command { 'check_nrpe_updates':
     command_line => "${nrpe} -c check_updates",
   }
+  nagios_command { 'check_nrpe_bacula':
+    command_line => "${nrpe} -c check_bacula -a \$ARG1$ \$ARG2$",
+  }
   nagios_command { 'check_nrpe_mysql':
     command_line => "${nrpe} -c check_mysql -a \$ARG1$ \$ARG2$",
   }
