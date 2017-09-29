@@ -1,4 +1,3 @@
-# === Class nagios::params
 #
 class nagios::params {
 
@@ -43,17 +42,14 @@ class nagios::params {
   }
 
   $admin_email            = 'nagiosadmin@localhost'
-  $admin_members          = 'nagiosadmin'
-  $webpass                = 'Password'
+  $admin_members          = ['nagiosadmin']
   $check_ntp_remote_addr  = 'time.google.com'
   $check_dns_resolve_name = 'google.com'
-  $package_ensure         = 'present'
-  $service_ensure         = 'running'
 
   # nrpe.cfg
   $nrpe_listen_port       = '5666'
   $nrpe_bind_address      = undef
-  $nrpe_allow_args        = '1'
-  $nrpe_debug             = '0'
+  $nrpe_allow_args        = true
+  $nrpe_debug             = false
 
 }

@@ -1,6 +1,7 @@
-# === Class nagios::server::config
 #
 class nagios::server::config {
+
+  assert_private('This is private class')
 
   # Works great, but only if the "target" is the default (known limitation)
   resources { [
@@ -15,7 +16,7 @@ class nagios::server::config {
     purge  => true,
   }
 
-  if $::nagios::server::install::package_ensure == 'present' {
+  if $nagios::server::ensure == 'present' {
     nagios_hostgroup {
     'windows-servers': 
       alias => 'Windows hosts';
@@ -28,11 +29,8 @@ class nagios::server::config {
     contain ::nagios::server::import
   }
 
-  # must define since it's used later in other .pp
-  $file_ensure = $nagios::server::install::package_ensure ? { 'purged' => 'absent', 'present' => 'present' }
-
   File {
-    ensure => $file_ensure,
+    ensure => $nagios::server::ensure,
     owner  => 'root',
   }
 

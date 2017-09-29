@@ -31,8 +31,11 @@ log_facility=daemon
 # syslog facility.
 # Values: 0=debugging off, 1=debugging on
 
-debug=<%= @nrpe_debug %>
-
+<% if @nrpe_debug -%>
+debug=1
+<% else -%>
+debug=0
+<% end -%>
 
 
 # PID FILE
@@ -122,8 +125,11 @@ allowed_hosts=<%= @servers %>
 #
 # Values: 0=do not allow arguments, 1=allow command arguments
 
-dont_blame_nrpe=<%= @nrpe_allow_args %>
-
+<% if @nrpe_allow_args -%>
+dont_blame_nrpe=1
+<% else -%>
+dont_blame_nrpe=0
+<% end -%>
 
 
 # BASH COMMAND SUBSTITUTION

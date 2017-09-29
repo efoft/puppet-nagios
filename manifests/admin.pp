@@ -1,21 +1,11 @@
-# === define nagios::admin
 #
-define nagios::admin(
-  $ensure    = 'present',
-  $password  = undef,
-  $alias     = undef,
-  $email     = undef,
-  $use       = 'generic-contact',
+define nagios::admin (
+  Enum['present','absent'] $ensure = 'present',
+  String $password,
+  String $email,
+  Optional[String] $alias          = undef,
+  String $use                      = 'generic-contact',
 ) {
-
-  # In Puppet 4 empty string is not falsey as in Puppet 3
-  # So we check it mapped to boolean (for undef) and for emptyness
-  if ! $password or empty($password){
-    fail('Parameter password is required for contact')
-  }
-  if ! $email or empty($email) {
-    fail('Parameter email is required for contact')
-  }
 
   if $ensure == 'present' {
     @@exec { "update-${name}-to-passwd":

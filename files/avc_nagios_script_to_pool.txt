@@ -1,0 +1,3 @@
+type=AVC msg=audit(1506618314.625:37534): avc:  denied  { read } for  pid=14389 comm="status.cgi" name="objects.cache" dev="dm-0" ino=4133749 scontext=system_u:system_r:nagios_script_t:s0 tcontext=system_u:object_r:nagios_spool_t:s0 tclass=file
+type=AVC msg=audit(1506618329.246:37537): avc:  denied  { getattr } for  pid=14392 comm="status.cgi" path="/var/spool/nagios/objects.cache" dev="dm-0" ino=4133749 scontext=system_u:system_r:nagios_script_t:s0 tcontext=system_u:object_r:nagios_spool_t:s0 tclass=file
+type=AVC msg=audit(1506680230.749:39905): avc:  denied  { open } for  pid=6684 comm="status.cgi" path="/var/spool/nagios/objects.cache" dev="dm-0" ino=4133749 scontext=system_u:system_r:nagios_script_t:s0 tcontext=system_u:object_r:nagios_spool_t:s0 tclass=file

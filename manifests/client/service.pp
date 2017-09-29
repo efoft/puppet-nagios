@@ -14,7 +14,7 @@ define nagios::client::service (
     fail('Parameter command is required')
   }
 
-  @@nagios_service { "${::fqdn}_${title}":
+  @@nagios_service { "${::fqdn}_check_nrpe_${title}":
     ensure              => $ensure,
     use                 => $use,
     host_name           => $host_name,

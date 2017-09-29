@@ -14,16 +14,13 @@
 # package manager.
 #
 define nagios::plugin (
-  $ensure        = 'present',
-  $shortname     = $title,
-  $source        = 'package',
-  $package_name  = "nagios-plugins-${shortname}",
-  $script_name   = "check_${shortname}",
-  $dep_packages  = [],
+  Enum['present','absent'] $ensure = 'present',
+  String $shortname                = $title,
+  Enum['package','script'] $source = 'package',
+  String $package_name             = "nagios-plugins-${shortname}",
+  String $script_name              = "check_${shortname}",
+  Array $dep_packages              = [],
 ) {
-
-  validate_re($ensure, ['present','absent'], "`ensure` got invalid value of `${ensure}`")
-  validate_re($source, ['package','script'], "`source` can have values of: `package` or `script`")
 
   if $source == 'package' {
     ensure_packages($package_name, {'ensure' => $ensure})
