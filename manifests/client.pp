@@ -1,11 +1,53 @@
-# === Class nagios::client
+# === Class nagios::client ===
+# Installs and configures nagios client on Linux and Windows.
+#
+# === Parameters ===
+# [*servers*]
+#   From where nrpe allows connections from.
+#
+# [*myip*]
+#   IP reachable from nagios server.
+#
+# [*contacts*]
+#   Optional. If not specified nagiosadmin is the only contact and administrator for this client host.
+#   Format is like the following (hiera format):
+#     admin1:
+#        alias: 'Admin 1'
+#        email: 'admin@example.com'
+#        password: admin1
+#     admin2:
+#       alias: 'Nagios Admin'
+#       email: 'nagios@localhost'
+#       password: admin2
+#   Once set they can log in into GUI and also they receive notification for the host they are specified as contacts.
+#
+# [*nrpe_listen_port*]
+#   Default: 5666
+#
+# [*nrpe_bind_address*]
+#   Address that nrpe should bind to in case there are more than one interface
+#   and you do not want nrpe to bind on all interfaces.
+#   If not set, 127.0.0.1 is used.
+#   Default: undef
+#
+# [*nrpe_allow_args*]
+#   Corresponds to nrpe.cfg dont_blame_nrpe parameter which allows arguments to be passed via nrpe_check.
+#
+# [*nrpe_debug*]
+#   Corresponds to nrpe.cfg debug parameter.
+#
+# [*defaultchecks*]
+#   Can be enabled or disabled at once for the client.
+#   Each of these checks can be disabled or enabled also individually.
+#
+# All the rest parameters are swithes to specific checks and some params for them (like passwords).
 #
 class nagios::client(
   Enum['present','absent'] $ensure    = 'present',
   Array[String] $servers              = ['127.0.0.1'],
-  String $myip                        = $::ipaddress,
+  Stdlib::Compat::Ipv4 $myip          = $::ipaddress,
   Hash $contacts                      = {},
-  String $nrpe_listen_port            = $nagios::params::nrpe_listen_port,
+  Numeric $nrpe_listen_port           = $nagios::params::nrpe_listen_port,
   Optional[String] $nrpe_bind_address = $nagios::params::nrpe_bind_address,
   Boolean $nrpe_allow_args            = $nagios::params::nrpe_allow_args,
   Boolean $nrpe_debug                 = $nagios::params::nrpe_debug,
@@ -99,9 +141,11 @@ class nagios::client(
     enable => $ensure ? { 'present' => true, 'absent'      => undef },
   }
 
-  # Form a list of host contacts. If it's empty - use 'nagiosadmin' instead. If `contacts` parameter is used in host declaration, it must have
-  # a value otherwise it leaves this parameter in nagios cfg empty which leads to error. Nagiosadmin is always in contact anyway since it's in
-  # admin contactgroup.
+  # If `contacts` parameter is used in host declaration, it must have
+  # a value otherwise it leaves this parameter in nagios cfg empty which leads to error.
+  # That's why we use nagiosadmin if nothing specified.
+  # It contacts are supplied, nagiosadmin is not added but nagiosadmin is always a contact
+  # since it's in admin contactgroup.
   $contacts_list = inline_template("<% if @contacts %><%= @contacts.select {|key,value| !value.to_s.match(/absent/) }.keys.join(',') %><% end %>")
   $host_contacts = empty($contacts_list) ? { true => 'nagiosadmin', false => $contacts_list }
 

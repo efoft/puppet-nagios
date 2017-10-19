@@ -1,3 +1,5 @@
+# === Define nagios::admin ===
+# Adds a user with access to GUI interface and a contact to be notified.
 #
 define nagios::admin (
   Enum['present','absent'] $ensure = 'present',

@@ -47,7 +47,7 @@ class nagios::params {
   $check_dns_resolve_name = 'google.com'
 
   # nrpe.cfg
-  $nrpe_listen_port       = '5666'
+  $nrpe_listen_port       = 5666
   $nrpe_bind_address      = undef
   $nrpe_allow_args        = true
   $nrpe_debug             = false

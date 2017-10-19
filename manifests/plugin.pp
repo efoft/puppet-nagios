@@ -1,17 +1,17 @@
-# Installs check plugin on server or client
+# === Define nagios::plugin ===
+# Installs check plugin on a server or a client.
 #
-# === Parameters
-#
+# === Parameters ===
 # [*source*]
-# Can be 'package'(installed by yum) or 'script' (downloaded as file from puppet).
+#   Can be 'package'(installed by yum) or 'script' (downloaded as file from puppet).
 #
 # [*script_name*]
-# File name located under module's files folder to be transfered to a client.
+#   File name located under module's files folder to be transfered to a client.
 #
 # [*dep_packages*]
-# Packages required to be install as dependencies. Usually is needed for script
-# type plugins. Normal packages are installed with dependencies automatically via
-# package manager.
+#   Packages required to be install as dependencies. Usually is needed for script
+#   type plugins. Normal packages are installed with dependencies automatically via
+#   package manager.
 #
 define nagios::plugin (
   Enum['present','absent'] $ensure = 'present',

@@ -3,15 +3,15 @@
 #
 # === Parameters ===
 # [*admin_email*]
-# Who receives all admin notifications.
-# Default: nagios@localhost
+#   Who receives all admin notifications.
+#   Default: nagios@localhost
 #
 # [*admin_members*]
-# Http users who have admin rights.
-# Default: nagiosadmin
+#   Http users who have admin rights.
+#   Default: nagiosadmin
 #
 # [*webpass*]
-# Password string for web gui authentication.
+#   Password string for web gui authentication.
 #
 class nagios::server(
   Enum['present','absent'] $ensure = 'present',
