@@ -2,6 +2,7 @@
 #
 define nagios::client::partition(
   $filesystem  = undef,
+  $label       = undef,
   $mount       = undef,
   $size        = undef,
   $size_bytes  = undef,
