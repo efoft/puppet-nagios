@@ -1,18 +1,12 @@
 #
 define nagios::client::service (
-  $ensure        = 'present',
-  $use           = 'generic-service',
-  $host_name     = $::fqdn,
-  $command       = "check_nrpe_${title}",
-  $args          = '',
-  $description   = upcase($title),
+  Enum['present','absent'] $ensure = 'present',
+  String $use                      = 'generic-service',
+  String $host_name                = $::fqdn,
+  String $command                  = "check_nrpe_${title}",
+  String $args                     = '',
+  String $description              = upcase($title),
 ) {
-
-  validate_re($ensure, ['present','absent'], "`ensure` got invalid value of `${ensure}`")
-
-  if ! $command {
-    fail('Parameter command is required')
-  }
 
   @@nagios_service { "${::fqdn}_check_nrpe_${title}":
     ensure              => $ensure,

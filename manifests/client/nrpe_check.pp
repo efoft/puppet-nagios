@@ -2,23 +2,20 @@
 # to be collected on the server
 #
 define nagios::client::nrpe_check (
-  $ensure         = 'present',
+  Enum['present','absent'] $ensure        = 'present',
   # plugin params
-  $plugin_source  = 'package',
-  $package_name   = "${nagios::params::plugin_name_prefix}-${title}",
-  $script_name    = "check_${title}",
-  $dep_packages   = [],
+  Enum['package','script'] $plugin_source = 'package',
+  String $package_name                    = "${nagios::params::plugin_name_prefix}-${title}",
+  String $script_name                     = "check_${title}",
+  Array[String] $dep_packages             = [],
   # command params
-  $local_cmd      = "check_${title}",
-  $local_cmd_args = '',
+  String $local_cmd                       = "check_${title}",
+  String $local_cmd_args                  = '',
   # service params
-  $nrpe_cmd       = "check_nrpe_${title}",
-  $nrpe_cmd_args  = '',
-  $description    = upcase($title),
+  String $nrpe_cmd                        = "check_nrpe_${title}",
+  String $nrpe_cmd_args                   = '',
+  String $description                     = upcase($title),
 ) {
-
-  validate_re($ensure, ['present','absent'], "`ensure` got invalid value of `${ensure}`")
-  validate_re($plugin_source, ['package','script'], "`source` got invalid value of `${plugin_source}`")
 
   $plugin = { $title => {
       ensure         => $ensure,
