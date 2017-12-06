@@ -3,9 +3,8 @@
 #
 # === Parameters ===
 # [*servers*]
-#   From where nrpe allows connections from.
-#   Can be single value or and array.
-#   Default: 127.0.0.1
+#   From where nrpe allows connections from. Can be IP addresses or resolvable hostnames.
+#   Can be single value or array.
 #
 # [*myip*]
 #   IP reachable from nagios server.
@@ -46,7 +45,7 @@
 #
 class nagios::client(
   Enum['present','absent'] $ensure       = 'present',
-  Variant[Array[String],String] $servers = '127.0.0.1',
+  Variant[Array[String],String] $servers,
   Stdlib::Compat::Ipv4 $myip             = $::ipaddress,
   Hash $contacts                         = {},
   Numeric $nrpe_listen_port              = $nagios::params::nrpe_listen_port,
@@ -104,8 +103,6 @@ class nagios::client(
   Optional[String] $mssql_pass           = undef,
 ) inherits ::nagios::params {
 
-  tag $servers
-
   # Install nrpe package
   package { $nagios::params::nrpe_package:
     ensure => $ensure ? { 'present' => 'present', 'absent' => 'purged' },
@@ -152,6 +149,8 @@ class nagios::client(
   $host_contacts = empty($contacts_list) ? { true => 'nagiosadmin', false => $contacts_list }
 
   # exported resources
+  tag $servers
+
   @@nagios_host { $::fqdn:
     ensure   => $ensure,
     alias    => $::hostname,
@@ -160,9 +159,9 @@ class nagios::client(
     contacts => $host_contacts,
   }
 
-  create_resources(::nagios::admin, $contacts)
-
   if $ensure == 'present' {
+    create_resources(::nagios::admin, $contacts)
+
     include "::nagios::client::checks::${::kernel}"
     include ::nagios::client::checks::common
   }
