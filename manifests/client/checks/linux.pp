@@ -101,28 +101,33 @@ class nagios::client::checks::linux {
 
   # Bacula
   if $nagios::client::bacula {
-    if ! $nagios::client::bacula_pass {
-      fail('Parameter bacula_pass is required for bacula monitoring.')
+    if versioncmp($::operatingsystemmajrelease, '7') < 0 {
+      notify { 'Bacula plugin is not available on OS version below 7. Skipping': loglevel => 'warning' }
     }
+    else {
+      if ! $nagios::client::bacula_pass {
+        fail('Parameter bacula_pass is required for bacula monitoring.')
+      }
 
-    nagios::plugin { 'bacula': }
-    nagios::client::nrpe_command { 'bacula':
-      args    => '-H localhost -D $ARG1$ -M bacula-mon -K $ARG2$',
-    }
-    nagios::client::service { 'bacula_dir':
-      command     => 'check_nrpe_bacula',
-      args        => "!dir!${nagios::client::bacula_pass}",
-      description => 'Bacula Director',
-    }
-    nagios::client::service { 'bacula_sd':
-      command     => 'check_nrpe_bacula',
-      args        => "!sd!${nagios::client::bacula_pass}",
-      description => 'Bacula Storage',
-    }
-    nagios::client::service { 'bacula_fd':
-      command     => 'check_nrpe_bacula',
-      args        => "!fd!${nagios::client::bacula_pass}",
-      description => 'Bacula File Daemon',
+      nagios::plugin { 'bacula': }
+      nagios::client::nrpe_command { 'bacula':
+        args    => '-H localhost -D $ARG1$ -M bacula-mon -K $ARG2$',
+      }
+      nagios::client::service { 'bacula_dir':
+        command     => 'check_nrpe_bacula',
+        args        => "!dir!${nagios::client::bacula_pass}",
+        description => 'Bacula Director',
+      }
+      nagios::client::service { 'bacula_sd':
+        command     => 'check_nrpe_bacula',
+        args        => "!sd!${nagios::client::bacula_pass}",
+        description => 'Bacula Storage',
+      }
+      nagios::client::service { 'bacula_fd':
+        command     => 'check_nrpe_bacula',
+        args        => "!fd!${nagios::client::bacula_pass}",
+        description => 'Bacula File Daemon',
+      }
     }
   }
 
