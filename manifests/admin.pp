@@ -1,6 +1,10 @@
 # === Define nagios::admin ===
 # Adds a user with access to GUI interface and a contact to be notified.
 #
+# For Apache 2.4 password is verified each puppet run and updated if doesn't match.
+# But for 2.2 version there is no way to verity the htpasswd so it only assigned once
+# and not updated any longer.
+#
 define nagios::admin (
   Enum['present','absent'] $ensure = 'present',
   String $password,
@@ -9,11 +13,25 @@ define nagios::admin (
   String $use                      = 'generic-contact',
 ) {
 
+  $vers = (versioncmp($::apache_version, '2.4') >= 0) ?
+  {
+    true  => '24',
+    false => '22'
+  }
+
   if $ensure == 'present' {
     @@exec { "update-${name}-to-passwd":
-      path    => ['/usr/bin'],
-      command => "htpasswd -bB ${nagios::params::passwd_file} ${name} ${password}",
-      unless  => "htpasswd -bv ${nagios::params::passwd_file} ${name} ${password}",
+      path    => ['/usr/bin','/bin'],
+      command => $vers ?
+        {
+          '24' => "htpasswd -bB ${nagios::params::passwd_file} ${name} ${password}", # Bcrypt
+          '22' => "htpasswd -bs ${nagios::params::passwd_file} ${name} ${password}"  # SHA
+        },
+      unless => $vers ?
+        {
+          '24' => "htpasswd -bv ${nagios::params::passwd_file} ${name} ${password}",
+          '22' => "grep ${name} ${nagios::params::passwd_file}"
+        },
     }
   }
   else {
