@@ -107,11 +107,7 @@ nrpe_group=nrpe
 # you are running this daemon on.
 #
 # NOTE: This option is ignored if NRPE is running under either inetd or xinetd
-<% if @servers.kind_of?(Array) -%>
-allowed_hosts=<%= @servers.join(",") %>
-<% else -%>
-allowed_hosts=<%= @servers %>
-<% end -%>
+allowed_hosts=<%= @_servers.join(",") %>
 
 # COMMAND ARGUMENT PROCESSING
 # This option determines whether or not the NRPE daemon will allow clients

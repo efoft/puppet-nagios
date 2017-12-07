@@ -1,7 +1,16 @@
 # === Class nagios::server ===
 # Installs and configures nagios server.
 #
+# Client hosts and their resources are exported to PuppetDB and than
+# collected here.
+#
 # === Parameters ===
+# [*site*]
+#   Any name that must be common for nagios server and clients served by
+#   this server. This value is used for tag filtering when collecting 
+#   exported resources from clients.
+#   Default: domain fact
+#
 # [*admin_email*]
 #   Who receives all admin notifications.
 #   Default: nagios@localhost
@@ -15,6 +24,7 @@
 #
 class nagios::server(
   Enum['present','absent'] $ensure = 'present',
+  String $site                     = $::domain,
   String $admin_email              = $nagios::params::admin_email,
   Array[String] $admin_members     = $nagios::params::admin_members,
   String $webpass,

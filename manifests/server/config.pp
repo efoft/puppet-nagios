@@ -14,6 +14,7 @@ class nagios::server::config {
     'nagios_servicegroup',
   ]:
     purge  => true,
+    notify => Service[$nagios::params::service_name],
   }
 
   if $nagios::server::ensure == 'present' {

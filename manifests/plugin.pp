@@ -23,13 +23,13 @@ define nagios::plugin (
 ) {
 
   if $source == 'package' {
-    ensure_packages($package_name, {'ensure' => $ensure})
+    ensure_packages($package_name, {ensure => $ensure})
   }
   else {
-    ensure_resources('file', { "${nagios::params::plugin_dir}/${script_name}" => {'ensure' => $ensure, 'source' => "puppet:///modules/nagios/${script_name}"}})
+    ensure_resources('file', { "${nagios::params::plugin_dir}/${script_name}" => {ensure => $ensure, source => "puppet:///modules/nagios/${script_name}", mode => '0755'}})
   }
 
   if $dep_packages {
-    ensure_packages($dep_packages, {'ensure' => $ensure})
+    ensure_packages($dep_packages, {ensure => $ensure})
   }
 }
