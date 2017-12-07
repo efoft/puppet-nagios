@@ -7,7 +7,7 @@ class nagios::server::contacts {
     alias    => 'Nagios Admin',
     password => $nagios::server::webpass,
     email    => $nagios::server::admin_email,
-    tag      => '127.0.0.1',
+    tag      => $nagios::server::site,
   }
   nagios_contactgroup { 'admins':
     alias   => 'Nagios Administrators',

@@ -58,6 +58,7 @@ class nagios::client::checks::linux {
     if $nagios::client::linux_raid and $::mdstat_has_devices {
       nagios::client::nrpe_check { 'linux_raid':
         plugin_source => 'script',
+        dep_packages  => ['nagios-plugins-perl'],
         description   => 'Linux RAID',
       }
     }

@@ -6,7 +6,7 @@ CheckExternalScripts=enabled
 NRPEServer=enabled
 
 [/settings/default]
-allowed hosts = <%= @servers.join(',') %>
+allowed hosts = <%= @_servers.join(',') %>
 
 [/settings/NRPE/server]
 use ssl = false

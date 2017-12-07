@@ -1,0 +1,1 @@
+type=AVC msg=audit(1512573306.164:2735): avc:  denied  { sendto } for  pid=3952 comm="check_nrpe" path="/dev/log" scontext=unconfined_u:system_r:nagios_services_plugin_t:s0 tcontext=system_u:system_r:syslogd_t:s0 tclass=unix_dgram_socket

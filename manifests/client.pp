@@ -9,6 +9,10 @@
 # [*myip*]
 #   IP reachable from nagios server.
 #
+# [*site*]
+#   The value must be the same as for nagios server. This value is used for tagging exported resources.
+#   Default: domain fact
+#
 # [*contacts*]
 #   Optional. If not specified nagiosadmin is the only contact and administrator for this client host.
 #   Format is like the following (hiera format):
@@ -47,6 +51,7 @@ class nagios::client(
   Enum['present','absent'] $ensure       = 'present',
   Variant[Array[String],String] $servers,
   Stdlib::Compat::Ipv4 $myip             = $::ipaddress,
+  String $site                           = $::domain,
   Hash $contacts                         = {},
   Numeric $nrpe_listen_port              = $nagios::params::nrpe_listen_port,
   Optional[String] $nrpe_bind_address    = $nagios::params::nrpe_bind_address,
@@ -115,6 +120,9 @@ class nagios::client(
     }
   }
 
+  # Always allow to connect from localhost
+  $_servers = unique(concat(['127.0.0.1'], $servers))
+
   # Main config
   file { $nagios::params::nrpe_cfg_file:
     ensure  => $ensure,
@@ -149,7 +157,7 @@ class nagios::client(
   $host_contacts = empty($contacts_list) ? { true => 'nagiosadmin', false => $contacts_list }
 
   # exported resources
-  tag $servers
+  tag $site
 
   @@nagios_host { $::fqdn:
     ensure   => $ensure,
