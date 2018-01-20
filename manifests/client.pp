@@ -45,6 +45,15 @@
 #   Can be enabled or disabled at once for the client.
 #   Each of these checks can be disabled or enabled also individually.
 #
+# [*ext_scripts*]
+#   Use of nsclient++ external scripts mechanism that allows to call external programs on client and return
+#   the result of their execution. We assume that executable itself is already in place.
+#   Hash should look like this (hiera format):
+#     ext_scripts:
+#       intel_rst_raid:
+#         command: "c:\\nagios\\check_intel_rst\\check_intel_rst.exe path=c:\\nagios\\check_intel_rst"
+#         use: generic-service
+#
 # All the rest parameters are swithes to specific checks and some params for them (like passwords).
 #
 class nagios::client(
@@ -106,6 +115,8 @@ class nagios::client(
   Boolean $mssql_remote                  = false,
   String $mssql_user                     = 'nagios',
   Optional[String] $mssql_pass           = undef,
+  Hash $ext_scripts                      = {},
+  ## end of specific windows checks
 ) inherits ::nagios::params {
 
   # Install nrpe package
@@ -172,5 +183,16 @@ class nagios::client(
 
     include "::nagios::client::checks::${::kernel}"
     include ::nagios::client::checks::common
+
+    if $::kernel == 'Windows' and $ext_scripts {
+      $ext_scripts.each |$k,$v| {
+        nagios::client::service { $k:
+          command     => 'check_nrpe',
+          args        => "!${k}",
+          use         => $v['use'],
+          description => $v['description'],
+        }
+      }
+    }
   }
 }

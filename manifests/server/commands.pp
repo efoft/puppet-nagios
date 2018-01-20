@@ -16,6 +16,10 @@ class nagios::server::commands(
     command_line => '/usr/bin/printf "%b" "***** Nagios *****\n\nNotification Type: $NOTIFICATIONTYPE$\n\nService: $SERVICEDESC$\nHost: $HOSTALIAS$\nAddress: $HOSTADDRESS$\nState: $SERVICESTATE$\n\nDate/Time: $LONGDATETIME$\n\nAdditional Info:\n\n$SERVICEOUTPUT$" | /bin/mail -s "** $NOTIFICATIONTYPE$ Service Alert: $HOSTALIAS$/$SERVICEDESC$ is $SERVICESTATE$ **" $CONTACTEMAIL$',
   }
 
+  nagios_command { 'check_nrpe':
+    command_line => "${nrpe} -c \$ARG1\$",
+  }
+
   # Remote checks (via network)
   # All local checks ara done by nrpe and produced from client's @@nagios_service
   nagios_command { 'check-host-alive':
@@ -164,7 +168,7 @@ class nagios::server::commands(
     command_line => "${nrpe} -c check_swap",
   }
   nagios_command { 'check_nrpe_disk':
-    command_line => "${nrpe} -c check_disk -a \$ARG1$",
+    command_line => "${nrpe} -c check_disk -a \$ARG1\$",
   }
   nagios_command { 'check_nrpe_procs':
     command_line => "${nrpe} -c check_procs",
