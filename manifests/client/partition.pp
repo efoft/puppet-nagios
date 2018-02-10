@@ -6,7 +6,8 @@ define nagios::client::partition(
   $mount       = undef,
   $size        = undef,
   $size_bytes  = undef,
-  $uuid        = undef
+  $uuid        = undef,
+  $partuuid    = undef,
 ) {
 
   if $mount != undef and $mount != 'swap' {

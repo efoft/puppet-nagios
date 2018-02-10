@@ -80,7 +80,7 @@ class nagios::client::checks::linux {
     if $nagios::client::ide_smart and ! $::is_virtual {
       nagios::plugin { 'ide_smart': }
       nagios::client::nrpe_command { 'ide_smart':
-        local_cmd_args => '-d $ARG1$',
+        args => '-d $ARG1$',
       }
       create_resources(nagios::client::disk, $::disks)
     }
