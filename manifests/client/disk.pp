@@ -7,10 +7,10 @@ define nagios::client::disk(
   $vendor      = undef
 ) {
 
-  unless $title =~ /^(fd|sr)/ {
+  unless $title =~ /^(fd|sr)/ or $size_bytes == 0 {
     nagios::client::service { $title:
-      command     => "check_nrpe_ide_smart!${title}",
-      description => "SMART for ${title}",
+      command     => "check_nrpe_ide_smart!/dev/${title}",
+      description => "SMART for /dev/${title}",
     }
   }
 }
