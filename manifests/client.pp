@@ -84,7 +84,6 @@ class nagios::client(
   ## windows
   Boolean $win_cpu                       = true,
   Boolean $win_memory                    = true,
-  Boolean $win_network                   = true,
   Boolean $win_diskspace                 = true,
   Boolean $win_eventlog                  = true,
   Array[String] $win_eventlog_files      = ['system','application'],

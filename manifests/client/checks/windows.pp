@@ -17,13 +17,6 @@ class nagios::client::checks::windows {
       }
     }
 
-    # Network
-    if $nagios::client::win_network {
-      nagios::client::service { 'win_network':
-        description => 'Network interface',
-      }
-    }
-
     # Disks
     if $nagios::client::win_diskspace {
       nagios::client::service { 'win_diskspace':
