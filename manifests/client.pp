@@ -95,6 +95,8 @@ class nagios::client(
   Boolean $http                          = false,
   Boolean $bacula                        = false,
   Optional[String] $bacula_pass          = undef,
+  Boolean $sip                           = false,
+  Optional[String] $sip_uri              = undef,
   ## end of common checks
   ## specific linux checks
   Boolean $mysql_local                   = false,

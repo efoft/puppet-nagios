@@ -25,6 +25,10 @@ class nagios::client::checks::common {
 
   # SIP
   if $nagios::client::sip {
+    if ! $nagios::client::sip_uri or empty($nagios::client::sip_uri) {
+      fail('Parameter sip_uri is required')
+    }
+
     nagios::client::network_check { 'sip':
       plugin_source => 'script',
       dep_packages  => ['nagios-plugins-perl','perl-Switch'],
