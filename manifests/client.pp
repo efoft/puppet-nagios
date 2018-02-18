@@ -186,7 +186,7 @@ class nagios::client(
     if $::kernel == 'Windows' and $ext_scripts {
       $ext_scripts.each |$k,$v| {
         nagios::client::service { $k:
-          command     => 'check_nrpe',
+          command     => 'check_nrpe_nossl',
           args        => "!${k}",
           use         => $v['use'],
           description => $v['description'],

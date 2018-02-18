@@ -20,6 +20,10 @@ class nagios::server::commands(
     command_line => "${nrpe} -c \$ARG1\$",
   }
 
+  nagios_command { 'check_nrpe_nossl':
+    command_line => "${nrpe} -n -c \$ARG1\$",
+  }
+
   # Remote checks (via network)
   # All local checks ara done by nrpe and produced from client's @@nagios_service
   nagios_command { 'check-host-alive':
