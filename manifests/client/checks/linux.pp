@@ -48,7 +48,7 @@ class nagios::client::checks::linux {
     if $nagios::client::partitions {
       nagios::plugin { 'disk': }
       nagios::client::nrpe_command { 'disk':
-        args => '-w 80 -c 90 -p $ARG1$',
+        args => '-w 10% -c 5% -w 100 -c 50 -p $ARG1$',
       }
       create_resources(nagios::client::partition, $::partitions)
     }
