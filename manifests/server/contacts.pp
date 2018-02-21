@@ -11,6 +11,6 @@ class nagios::server::contacts {
   }
   nagios_contactgroup { 'admins':
     alias   => 'Nagios Administrators',
-    members => $magios::server::admins_members,
+    members => $nagios::server::admin_members,
   }
 }
