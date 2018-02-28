@@ -1,5 +1,5 @@
 # === Define nagios::plugin ===
-# Installs check plugin on a server or a client.
+# Installs plugin on a server or a client.
 #
 # === Parameters ===
 # [*source*]
@@ -23,13 +23,18 @@ define nagios::plugin (
 ) {
 
   if $source == 'package' {
-    ensure_packages($package_name, {ensure => $ensure})
+    ensure_packages($package_name, { ensure => $ensure })
   }
   else {
-    ensure_resources('file', { "${nagios::params::plugin_dir}/${script_name}" => {ensure => $ensure, source => "puppet:///modules/nagios/${script_name}", mode => '0755'}})
+    $script_install_options = {
+      ensure => $ensure,
+      source => "puppet:///modules/${module_name}/${script_name}",
+      mode   => '0755',
+    }
+    ensure_resources('file', { "${nagios::params::plugin_dir}/${script_name}" => $script_install_options })
   }
 
   if $dep_packages {
-    ensure_packages($dep_packages, {ensure => $ensure})
+    ensure_packages($dep_packages, { ensure => $ensure })
   }
 }

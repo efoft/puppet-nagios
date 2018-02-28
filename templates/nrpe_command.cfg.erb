@@ -1,0 +1,2 @@
+command[<%= @clnt_cmd_name %>]=<%= scope['nagios::params::plugin_dir'] %>/<%= @clnt_cmd_exec %><% if @clnt_cmd_args %> <%= @clnt_cmd_args %><% end -%>
+

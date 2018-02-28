@@ -1,10 +1,9 @@
 # === Class nagios::server::commands
 #
 class nagios::server::commands(
-  $nrpe                   = '$USER1$/check_nrpe -H $HOSTADDRESS$ -t 30',
-  $nrpe_nossl             = '$USER1$/check_nrpe -H $HOSTADDRESS$ -t 30 -n',
-  $check_ntp_remote_addr  = $nagios::params::check_ntp_remote_addr,
-  $check_dns_resolve_name = $nagios::params::check_dns_resolve_name
+  Integer $nrpe_exec_timeout     = 30,
+  String $check_ntp_remote_addr  = $nagios::params::check_ntp_remote_addr,
+  String $check_dns_resolve_name = $nagios::params::check_dns_resolve_name
 ) inherits ::nagios::params {
 
   # Taken from commands.cfg
@@ -17,15 +16,23 @@ class nagios::server::commands(
   }
 
   nagios_command { 'check_nrpe':
-    command_line => "${nrpe} -c \$ARG1\$",
+    command_line => "\$USER1$/check_nrpe -H \$HOSTADDRESS$ -t ${nrpe_exec_timeout} -c \$ARG1\$",
+  }
+
+  nagios_command { 'check_nrpe_args':
+    command_line => "\$USER1$/check_nrpe -H \$HOSTADDRESS$ -t ${nrpe_exec_timeout} -c \$ARG1\$ -a \$ARG2$",
   }
 
   nagios_command { 'check_nrpe_nossl':
-    command_line => "${nrpe} -n -c \$ARG1\$",
+    command_line => "\$USER1$/check_nrpe -H \$HOSTADDRESS$ -t ${nrpe_exec_timeout} -n -c \$ARG1\$",
+  }
+
+  nagios_command { 'check_nrpe_args_nossl':
+    command_line => "\$USER1$/check_nrpe -H \$HOSTADDRESS$ -t ${nrpe_exec_timeout} -n -c \$ARG1\$ -a \$ARG2$",
   }
 
   # Remote checks (via network)
-  # All local checks ara done by nrpe and produced from client's @@nagios_service
+  # All local checks ara done by nrpe
   nagios_command { 'check-host-alive':
     command_line => '$USER1$/check_ping -H $HOSTADDRESS$ -w 3000.0,80% -c 5000.0,100% -p 5',
   }
@@ -155,75 +162,5 @@ class nagios::server::commands(
   # Nginx
   nagios_command { 'check_nginx':
     command_line => '$USER1$/check_nginx $ARG1$',
-  }
-
-  ## Custom NRPE-based commands
-  # === Linux hosts
-  nagios_command { 'check_nrpe_users':
-    command_line => "${nrpe} -c check_users",
-  }
-  nagios_command { 'check_nrpe_load':
-    command_line => "${nrpe} -c check_load",
-  }
-  nagios_command { 'check_nrpe_zombie_procs':
-    command_line => "${nrpe} -c check_zombie_procs",
-  }
-  nagios_command { 'check_nrpe_swap':
-    command_line => "${nrpe} -c check_swap",
-  }
-  nagios_command { 'check_nrpe_disk':
-    command_line => "${nrpe} -c check_disk -a \$ARG1\$",
-  }
-  nagios_command { 'check_nrpe_procs':
-    command_line => "${nrpe} -c check_procs",
-  }
-  nagios_command { 'check_nrpe_ntp':
-    command_line => "${nrpe} -u -c check_ntp_time",
-  }
-  nagios_command { 'check_nrpe_linux_raid':
-    command_line => "${nrpe} -c check_linux_raid",
-  }
-  nagios_command { 'check_nrpe_drbd':
-    command_line => "${nrpe} -c check_drbd",
-  }
-  nagios_command { 'check_nrpe_sensors':
-    command_line => "${nrpe} -c check_sensors",
-  }
-  nagios_command { 'check_nrpe_ide_smart':
-    command_line => "${nrpe} -c check_ide_smart -a \$ARG1$",
-  }
-  nagios_command { 'check_nrpe_updates':
-    command_line => "${nrpe} -c check_updates",
-  }
-  nagios_command { 'check_nrpe_bacula':
-    command_line => "${nrpe} -c check_bacula -a \$ARG1$ \$ARG2$",
-  }
-  nagios_command { 'check_nrpe_mysql':
-    command_line => "${nrpe} -c check_mysql -a \$ARG1$ \$ARG2$",
-  }
-  nagios_command { 'check_nrpe_pgsql':
-    command_line => "${nrpe} -c check_pgsql",
-  }
-  nagios_command { 'check_nrpe_mongodb':
-    command_line => "${nrpe} -c check_mongodb",
-  }
-  # === Windows hosts
-  nagios_command { 'check_nrpe_win_cpu':
-    command_line => "${nrpe_nossl} -c check_cpu",
-  }
-  nagios_command { 'check_nrpe_win_memory':
-    command_line => "${nrpe_nossl} -c check_memory",
-  }
-  nagios_command { 'check_nrpe_win_network':
-    command_line => "${nrpe_nossl} -c check_network",
-  }
-  nagios_command { 'check_nrpe_win_diskspace':
-    command_line => "${nrpe_nossl} -c alias_space",
-  }
-  nagios_command { 'check_nrpe_win_eventlog':
-    command_line => "${nrpe_nossl} -c alias_eventlog",
-  }
-  nagios_command { 'check_nrpe_win_service':
-    command_line => "${nrpe_nossl} -c check_service -a service=\$ARG1$",
   }
 }

@@ -3,12 +3,12 @@ define nagios::client::service (
   Enum['present','absent'] $ensure = 'present',
   String $use                      = 'generic-service',
   String $host_name                = $::fqdn,
-  String $command                  = "check_nrpe_${title}",
+  String $command                  = undef,
   String $args                     = '',
   String $description              = upcase($title),
 ) {
 
-  @@nagios_service { "${::fqdn}_check_nrpe_${title}":
+  @@nagios_service { "${::fqdn}_${command}_${title}":
     ensure              => $ensure,
     use                 => $use,
     host_name           => $host_name,

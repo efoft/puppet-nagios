@@ -51,5 +51,4 @@ class nagios::params {
   $nrpe_bind_address      = undef
   $nrpe_allow_args        = true
   $nrpe_debug             = false
-
 }

@@ -1,52 +1,62 @@
 #
-class nagios::client::checks::windows {
+class nagios::client::checks::windows inherits ::nagios::client {
 
-  if $nagios::client::defaultchecks {
+  if $defaultchecks {
+
+    Nagios::Client::Service {
+      command => 'check_nrpe_nossl',
+    }
 
     # CPU
-    if $nagios::client::win_cpu {
+    if $win_cpu {
       nagios::client::service { 'win_cpu':
+        args        => '!check_cpu',
         description => 'CPU usage',
       }
     }
 
     # Memory
-    if $nagios::client::win_memory {
+    if $win_memory {
       nagios::client::service { 'win_memory':
+        args        => '!check_memory',
         description => 'Memory usage',
       }
     }
 
     # Disks
-    if $nagios::client::win_diskspace {
+    if $win_diskspace {
       nagios::client::service { 'win_diskspace':
+        args        => '!alias_space',
         description => 'Disk space usage',
       }
     }
 
     # Eventlog
-    if $nagios::client::win_eventlog {
+    if $win_eventlog {
       nagios::client::service { 'win_eventlog':
+        args        => '!alias_eventlog',
         description => 'Event Log',
       }
     }
   } # end of defaultchecks
 
   # Win services
-  if $nagios::client::win_services {
-    nagios::client::winsvc { $nagios::client::win_services: }
+  if $win_services {
+    $win_services.each |String $winsvc| {
+      nagios::client::service { $winsvc:
+        command     => 'check_nrpe_args_nossl',
+        args        => "!check_service!service=\"${winsvc}\"",
+        description => "Service ${winsvc}",
+      }
+    }
   }
 
   # MSSQL
-  if $nagios::client::mssql_remote {
-
-    $mssql_user = $nagios::client::mssql_user
-    $mssql_pass = $nagios::client::mssql_pass
-
+  if $mssql_remote {
     nagios::client::network_check { 'mssql':
-      plugin_source => 'script',
-      dep_packages  => ['php-mssql'],
-      args          => "!${mssql_user}!${mssql_pass}",
+      plugin_src   => 'script',
+      dep_packages => ['php-mssql'],
+      svc_cmd_args => "!${mssql_user}!${mssql_pass}",
     }
   }
 }

@@ -77,7 +77,8 @@ class nagios::client(
   Boolean $linux_raid                    = true,
   Boolean $drbd                          = true,
   Boolean $sensors                       = true,
-  Boolean $ide_smart                     = true,
+  Boolean $smart                         = true,
+  Enum['ide','scsi'] $smart_type         = 'ide',
   Boolean $updates                       = true,
   Boolean $ssh                           = true,
   ## end of linux defaultchecks
@@ -121,7 +122,7 @@ class nagios::client(
 ) inherits ::nagios::params {
 
   # Install nrpe package
-  package { $nagios::params::nrpe_package:
+  package { $nrpe_package:
     ensure => $ensure ? { 'present' => 'present', 'absent' => 'purged' },
   }
 
@@ -136,26 +137,26 @@ class nagios::client(
   $_servers = unique(concat(['127.0.0.1'], $servers))
 
   # Main config
-  file { $nagios::params::nrpe_cfg_file:
+  file { $nrpe_cfg_file:
     ensure  => $ensure,
-    content => template("nagios/${nagios::params::nrpe_cfg_template}"),
-    notify  => Service[$nagios::params::nrpe_service],
-    require => Package[$nagios::params::nrpe_package],
+    content => template("${module_name}/${nrpe_cfg_template}"),
+    notify  => Service[$nrpe_service],
+    require => Package[$nrpe_package],
   }
 
   # Include dir
-  if $nagios::params::nrpe_include_dir {
-    file { $nagios::params::nrpe_include_dir:
+  if $nrpe_include_dir {
+    file { $nrpe_include_dir:
       ensure  => $ensure ? { 'present' => 'directory', 'absent' => 'absent' },
       recurse => true,
       force   => true,
       purge   => true,
-      require => Package[$nagios::params::nrpe_package],
+      require => Package[$nrpe_package],
     }
   }
 
   # Service
-  service { $nagios::params::nrpe_service:
+  service { $nrpe_service:
     ensure => $ensure ? { 'present' => 'running', 'absent' => undef },
     enable => $ensure ? { 'present' => true, 'absent'      => undef },
   }
@@ -189,7 +190,7 @@ class nagios::client(
       $ext_scripts.each |$k,$v| {
         nagios::client::service { $k:
           command     => 'check_nrpe_nossl',
-          args        => "!${k}",
+          args        => "!${k}!''",
           use         => $v['use'],
           description => $v['description'],
         }

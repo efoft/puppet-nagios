@@ -1,10 +1,10 @@
 #
-class nagios::client::checks::linux {
+class nagios::client::checks::linux inherits ::nagios::client {
 
-  if $nagios::client::defaultchecks {
+  if $defaultchecks {
 
     # Load
-    if $nagios::client::load {
+    if $load {
       if $::processorcount > 16 {
         $load_args = '-w 60,40,40 -c 90,70,70'
       } elsif $::processorcount > 8 {
@@ -15,129 +15,159 @@ class nagios::client::checks::linux {
         $load_args = '-w 15,10,10 -c 30,25,25'
       }
       nagios::client::nrpe_check { 'load':
-        local_cmd_args => "-r ${load_args}",
+        clnt_cmd_args => "-r ${load_args}",
       }
     }
 
     # Swap
-    if $nagios::client::swap {
+    if $swap {
       nagios::client::nrpe_check { 'swap':
-        local_cmd_args => "-w 20 -c 10",
-        description    => 'Swap usage',
+        clnt_cmd_args => '-w 20% -c 10%',
+        description   => 'Swap usage',
       }
     }
 
     # Procs
-    if $nagios::client::procs {
+    if $procs {
       nagios::client::nrpe_check { 'procs':
-        local_cmd_args => "-w 600 -c 700",
-        description    => 'Total processes',
+        clnt_cmd_args => "-w 600 -c 700",
+        description   => 'Total processes',
       }
     }
 
     # NTP
-    if $nagios::client::ntp {
+    if $ntp {
       nagios::client::nrpe_check { 'ntp':
-        local_cmd      => 'check_ntp_time',
-        local_cmd_args => "-4 -H ${nagios::params::check_ntp_remote_addr}",
-        description    => 'NTP time',
+        clnt_cmd_exec => 'check_ntp_time',
+        clnt_cmd_args => "-4 -H ${check_ntp_remote_addr}",
+        description   => 'NTP time',
       }
     }
 
     # Partitions
-    if $nagios::client::partitions {
-      nagios::plugin { 'disk': }
-      nagios::client::nrpe_command { 'disk':
-        args => '-w 10% -c 5% -w 100 -c 50 -p $ARG1$',
+    if $partitions {
+      nagios::client::nrpe_check { 'disk':
+        clnt_cmd_args => '-w 10% -c 5% -w 100 -c 50 -p $ARG1$',
+        manage_svc    => false,
       }
-      create_resources(nagios::client::partition, $::partitions)
+
+      $::partitions.each |$dev, $opts| {
+        $mount = $opts['mount']
+        if $mount != undef and $mount != 'swap' {
+          nagios::client::service { $mount:
+            command     => "check_nrpe_args!check_disk!${mount}",
+            description => "Usage for ${mount}",
+          }
+        }
+      }
     }
 
     # Linux RAID (mdadm)
     # based on custom fact
-    if $nagios::client::linux_raid and $::mdstat_has_devices {
+    if $linux_raid and $::mdstat_has_devices {
       nagios::client::nrpe_check { 'linux_raid':
-        plugin_source => 'script',
-        dep_packages  => ['nagios-plugins-perl'],
-        description   => 'Linux RAID',
+        plugin_src   => 'script',
+        dep_packages => ['nagios-plugins-perl'],
+        description  => 'Linux RAID',
       }
     }
 
     # DRBD
     # based on custom fact
-    if $nagios::client::drbd and $::drbd_used {
+    if $drbd and $::drbd_used {
       nagios::client::nrpe_check { 'drbd':
-        plugin_source => 'script',
+        plugin_src => 'script',
       }
     }
 
     # Sensors
-    if $nagios::client::sensors and ! $::is_virtual {
+    if $sensors and ! $::is_virtual {
       nagios::client::nrpe_check { 'sensors': }
     }
 
     # IDE Smart
-    if $nagios::client::ide_smart and ! $::is_virtual {
-      nagios::plugin { 'ide_smart': }
-      nagios::client::nrpe_command { 'ide_smart':
-        args => '-d $ARG1$',
+    if $smart and ! $::is_virtual {
+      if $smart_type == 'ide' {
+        nagios::client::nrpe_check { 'smart':
+          plugin_src    => 'package',
+          package_name  => 'nagios-plugins-ide_smart',
+          clnt_cmd_exec => 'check_ide_smart',
+          clnt_cmd_args => '-d $ARG1$',
+          manage_svc    => false,
+        }
       }
-      create_resources(nagios::client::disk, $::disks)
+      elsif $smart_type == 'scsi' {
+        nagios::client::nrpe_check { 'smart':
+          plugin_src    => 'script',
+          script_name   => 'check_smart.pl',
+          dep_packages  => ['nagios-plugins-perl','smartmontools'],
+          clnt_cmd_exec => 'check_smart.pl',
+          clnt_cmd_args => '-d $ARG1$ -i scsi',
+          manage_svc    => false,
+        }
+      }
+      else {
+        fail("Disk type ${smart_type} for SMART monitoring is not supported")
+      }
+      $::disks.each |$disk, $opts| {
+        if $disk =~ /^(sd|vd|hd)/ and $opts['size_bytes'] != 0 {
+          nagios::client::service { $disk:
+            command     => "check_nrpe_args!check_smart!/dev/${disk}",
+            description => "SMART for /dev/${disk}",
+          }
+        }
+      }
     }
 
     # Updates
-    if $nagios::client::updates {
+    if $updates {
       nagios::client::nrpe_check { 'updates':
-        package_name   => 'nagios-plugins-check-updates',
-        local_cmd_args => '--security-only -t 30',
-        description    => 'System Up-to-date',
+        package_name  => 'nagios-plugins-check-updates',
+        clnt_cmd_args => '--security-only -t 30',
+        description   => 'System Up-to-date',
       }
     }
 
     # SSH
-    if $nagios::client::ssh {
+    if $ssh {
       nagios::client::network_check { 'ssh': }
     }
   } # end of defaultchecks
 
   # Bacula
-  if $nagios::client::bacula {
+  if $bacula {
     if versioncmp($::operatingsystemmajrelease, '7') < 0 {
       notify { 'Bacula plugin is not available on OS version below 7. Skipping': loglevel => 'warning' }
     }
     else {
-      if ! $nagios::client::bacula_pass {
+      if ! $bacula_pass {
         fail('Parameter bacula_pass is required for bacula monitoring.')
       }
 
-      nagios::plugin { 'bacula': }
-      nagios::client::nrpe_command { 'bacula':
-        args    => '-H localhost -D $ARG1$ -M bacula-mon -K $ARG2$',
+      nagios::client::nrpe_check { 'bacula':
+        clnt_cmd_args => "-H localhost -D \$ARG1$ -M bacula-mon -K ${bacula_pass}",
+        manage_svc    => false,
       }
       nagios::client::service { 'bacula_dir':
-        command     => 'check_nrpe_bacula',
-        args        => "!dir!${nagios::client::bacula_pass}",
+        command     => 'check_nrpe_args',
+        args        => "!check_bacula!dir",
         description => 'Bacula Director',
       }
       nagios::client::service { 'bacula_sd':
-        command     => 'check_nrpe_bacula',
-        args        => "!sd!${nagios::client::bacula_pass}",
+        command     => 'check_nrpe_args',
+        args        => "!check_bacula!sd",
         description => 'Bacula Storage',
       }
       nagios::client::service { 'bacula_fd':
-        command     => 'check_nrpe_bacula',
-        args        => "!fd!${nagios::client::bacula_pass}",
+        command     => 'check_nrpe_args',
+        args        => "!check_bacula!fd",
         description => 'Bacula File Daemon',
       }
     }
   }
 
   # MySQL
-  if $nagios::client::mysql_local or $nagios::client::mysql_remote {
-
-    $mysql_repl     = $nagios::client::mysql_repl
-    $mysql_user     = $nagios::client::mysql_user
-    $mysql_pass     = $nagios::client::mysql_pass
+  if $mysql_local or $mysql_remote {
 
     # In Puppet 4 empty string is not falsey as in Puppet 3
     # So we check it mapped to boolean (for undef) and for emptyness
@@ -149,57 +179,54 @@ class nagios::client::checks::linux {
     }
   }
 
-  if $nagios::client::mysql_local {
+  if $mysql_local {
     nagios::client::nrpe_check { 'mysql':
-      local_cmd_args => $mysql_repl ?
-        { true  => "-s ${nagios::params::mysql_socket_path} -u \$ARG1$ -p \$ARG2$ -S",
-          false => "-s ${nagios::params::mysql_socket_path} -u \$ARG1$ -p \$ARG2$"
+      clnt_cmd_args => $mysql_repl ?
+        {
+          true  => "-s ${mysql_socket_path} -u ${mysql_user} -p ${mysql_pass} -S",
+          false => "-s ${mysql_socket_path} -u ${mysql_user} -p ${mysql_pass}"
         },
-      nrpe_cmd_args => "!${mysql_user}!${mysql_pass}",
-      description   => $mysql_repl ? { true => 'MySQL with replication via socket', false => "MySQL via socket" },
+      description   => $mysql_repl ? { true            => 'MySQL with replication via socket', false => "MySQL via socket" },
     }
   }
 
-  if $nagios::client::mysql_remote {
+  if $mysql_remote {
     nagios::client::network_check { 'mysql':
-      command     => $mysql_repl ? { true  => 'check_mysql_repl', false => 'check_mysql' },
-      args        => "!${mysql_user}!${mysql_pass}",
-      description => $mysql_repl ? { true => 'MySQL with replication via network', false => "MySQL via network" },
+      svc_cmd      => $mysql_repl ? { true            => 'check_mysql_repl', false                   => 'check_mysql' },
+      svc_cmd_args => "!${mysql_user}!${mysql_pass}",
+      description  => $mysql_repl ? { true            => 'MySQL with replication via network', false => "MySQL via network" },
     }
   }
 
   # PostgreSQL
-  $pgsql_user = $nagios::client::pgsql_user
-  $pgsql_pass = $nagios::client::pgsql_pass
-
-  if $nagios::client::pgsql_local {
+  if $pgsql_local {
     nagios::client::nrpe_check { 'pgsql':
-      local_cmd_args => $pgsql_pass ? { undef => "-l ${pgsql_user}", default => "-l ${pgsql_user} -p ${pgsql_pass}" },
-      description    => 'PostgreSQL via socket',
+      clnt_cmd_args => $pgsql_pass ? { undef => "-l ${pgsql_user}", default => "-l ${pgsql_user} -p ${pgsql_pass}" },
+      description   => 'PostgreSQL via socket',
     }
   }
 
-  if $nagios::client::pgsql_remote {
+  if $pgsql_remote {
     nagios::client::network_check { 'pgsql':
-      args        => $pgsql_pass ? { undef     => "!${pgsql_user}", default => "!${pgsql_user}!-p ${pgsql_pass}" },
-      description => 'PostgreSQL via network',
+      svc_cmd_args => $pgsql_pass ? { undef     => "!${pgsql_user}", default => "!${pgsql_user}!-p ${pgsql_pass}" },
+      description  => 'PostgreSQL via network',
     }
   }
 
   # MongoDB
-  if $nagios::client::mongo_local {
+  if $mongo_local {
     nagios::client::nrpe_check { 'mongodb':
-      plugin_source => 'script',
-      dep_packages  => ['python-pymongo'],
-      description   => 'MongoDB via socket',
+      plugin_src   => 'script',
+      dep_packages => ['python-pymongo'],
+      description  => 'MongoDB via socket',
     }
   }
 
-  if $nagios::client::mongo_remote {
+  if $mongo_remote {
     nagios::client::network_check { 'mongodb':
-      plugin_source => 'script',
-      dep_packages  => ['python-pymongo'],
-      description => 'MongoDB via network',
+      plugin_src   => 'script',
+      dep_packages => ['python-pymongo'],
+      description  => 'MongoDB via network',
     }
   }
 }
