@@ -59,7 +59,7 @@
 class nagios::client(
   Enum['present','absent'] $ensure       = 'present',
   Variant[Array[String],String] $servers,
-  Stdlib::Compat::Ipv4 $myip             = $::ipaddress,
+  Stdlib::Ip::Address $myip              = $::ipaddress,
   String $site                           = $::domain,
   Hash $contacts                         = {},
   Numeric $nrpe_listen_port              = $nagios::params::nrpe_listen_port,
