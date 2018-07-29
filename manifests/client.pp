@@ -92,7 +92,9 @@ class nagios::client(
   ## common checks
   Boolean $smtp                          = false,
   Boolean $imap                          = false,
-  Boolean $pop                           = false,
+  Boolean $imaps                         = false,
+  Boolean $pop3                          = false,
+  Boolean $pop3s                         = false,
   Boolean $http                          = false,
   Boolean $bacula                        = false,
   Optional[String] $bacula_pass          = undef,

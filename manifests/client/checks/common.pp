@@ -12,9 +12,24 @@ class nagios::client::checks::common inherits ::nagios::client {
      package_name => 'nagios-plugins-tcp',
     }
   }
-  if $pop {
-    nagios::client::network_check { 'pop':
+  if $imaps {
+    nagios::client::network_check { 'imaps':
      package_name => 'nagios-plugins-tcp',
+     svc_cmd      => 'check_imap',
+     svc_cmd_args => '!-S -p 993',
+    }
+  }
+  if $pop3 {
+    nagios::client::network_check { 'pop3':
+     package_name => 'nagios-plugins-tcp',
+     svc_cmd      => 'check_pop',
+    }
+  }
+  if $pop3s {
+    nagios::client::network_check { 'pop3s':
+     package_name => 'nagios-plugins-tcp',
+     svc_cmd      => 'check_pop',
+     svc_cmd_args => '!-S -p 995',
     }
   }
 
