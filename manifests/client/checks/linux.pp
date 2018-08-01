@@ -123,7 +123,7 @@ class nagios::client::checks::linux inherits ::nagios::client {
     if $updates {
       nagios::client::nrpe_check { 'updates':
         package_name  => 'nagios-plugins-check-updates',
-        clnt_cmd_args => '--security-only -t 30',
+        clnt_cmd_args => '--security-only -t 60',
         description   => 'System Up-to-date',
       }
     }
