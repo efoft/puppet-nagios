@@ -27,6 +27,12 @@ class nagios::params {
       $nrpe_include_dir   = '/etc/nrpe.d'
       # other
       $mysql_socket_path  = '/var/lib/mysql/mysql.sock'
+      # webpass encryption type
+      $encryption = (versioncmp($::apache_version, '2.4') >= 0) ?
+      {
+        true  => 'bcrypt', # only supported with Apache 2.4+
+        false => 'sha'     # Apache 2.2
+      }
     }
     'windows': {
       #nscp
