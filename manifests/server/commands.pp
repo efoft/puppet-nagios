@@ -23,12 +23,14 @@ class nagios::server::commands(
     command_line => "\$USER1$/check_nrpe -H \$HOSTADDRESS$ -t ${nrpe_exec_timeout} -c \$ARG1\$ -a \$ARG2$",
   }
 
+  ## No-SSL commands are also updated with -2 flag meaning version 2 nrpe protocol. No-SSL are used here
+  ## only for Windows hosts which also don't support version 3.
   nagios_command { 'check_nrpe_nossl':
-    command_line => "\$USER1$/check_nrpe -H \$HOSTADDRESS$ -t ${nrpe_exec_timeout} -n -c \$ARG1\$",
+    command_line => "\$USER1$/check_nrpe -H \$HOSTADDRESS$ -t ${nrpe_exec_timeout} -2n -c \$ARG1\$",
   }
 
   nagios_command { 'check_nrpe_args_nossl':
-    command_line => "\$USER1$/check_nrpe -H \$HOSTADDRESS$ -t ${nrpe_exec_timeout} -n -c \$ARG1\$ -a \$ARG2$",
+    command_line => "\$USER1$/check_nrpe -H \$HOSTADDRESS$ -t ${nrpe_exec_timeout} -2n -c \$ARG1\$ -a \$ARG2$",
   }
 
   # Remote checks (via network)
