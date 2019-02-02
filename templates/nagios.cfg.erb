@@ -54,7 +54,9 @@ cfg_file=<%= file %>
 #cfg_dir=/etc/nagios/switches
 #cfg_dir=/etc/nagios/routers
 
-cfg_dir=/etc/nagios/conf.d
+## Commented out 02.04.2019 since last security update for nagios-common
+## rises an error in case of absense of such directory.
+#cfg_dir=/etc/nagios/conf.d
 
 
 
