@@ -1,5 +1,5 @@
 #
-class nagios::server::config {
+class nagios::server::config inherits nagios::server {
 
   assert_private('This is private class')
 
@@ -14,10 +14,10 @@ class nagios::server::config {
     'nagios_servicegroup',
   ]:
     purge  => true,
-    notify => Service[$nagios::params::service_name],
+    notify => Service[$service_name],
   }
 
-  if $nagios::server::ensure == 'present' {
+  if $ensure == 'present' {
     nagios_hostgroup {
     'windows-servers': 
       alias => 'Windows hosts';
@@ -25,20 +25,16 @@ class nagios::server::config {
       alias => 'Linux hosts';
     }
 
-    contain ::nagios::server::commands
-    contain ::nagios::server::contacts
-    contain ::nagios::server::import
+    contain nagios::server::config::commands
+    contain nagios::server::config::contacts
   }
 
   File {
-    ensure => $nagios::server::ensure,
+    ensure => $ensure,
     owner  => 'root',
   }
 
-  # must be resolved here since it's used in .erb
-  $managed_cfg_files = $nagios::params::managed_cfg_files
-
-  file { $nagios::params::nagios_cfg:
+  file { $nagios_cfg:
     content => template('nagios/nagios.cfg.erb'),
   }
 

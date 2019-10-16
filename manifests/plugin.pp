@@ -15,17 +15,16 @@
 #
 define nagios::plugin (
   Enum['present','absent'] $ensure = 'present',
-  String $shortname                = $title,
   Enum['package','script'] $source = 'package',
-  String $package_name             = "nagios-plugins-${shortname}",
-  String $script_name              = "check_${shortname}",
+  String $package_name             = "nagios-plugins-${title}",
+  String $script_name              = "check_${title}",
   Array $dep_packages              = [],
 ) {
 
   if $source == 'package' {
     ensure_packages($package_name, { ensure => $ensure })
   }
-  else {
+  elsif $source == 'script' {
     $script_install_options = {
       ensure => $ensure,
       source => "puppet:///modules/${module_name}/${script_name}",

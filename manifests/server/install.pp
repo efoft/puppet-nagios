@@ -1,16 +1,7 @@
 #
-class nagios::server::install {
+class nagios::server::install inherits nagios::server {
 
   assert_private('This is private class')
 
-  $package_ensure = $nagios::server::ensure ? {
-    'present'   => 'present',
-    'absent'    => 'purged',
-  }
-
-  package { $nagios::params::package_name:
-    ensure => $package_ensure,
-  }
-
-  ensure_packages($nagios::params::server_side_plugins, {'ensure' => $package_ensure}) 
+  ensure_packages(concat($server_side_plugins, $package_name), {'ensure' => $ensure ? {'absent' => 'purged', default => $ensure}})
 }

@@ -1,10 +1,10 @@
 #
-class nagios::server::service {
+class nagios::server::service inherits nagios::server {
 
   assert_private('This is private class')
 
-  service { $nagios::params::service_name:
-    ensure  => $nagios::server::ensure ? { 'present' => 'running', 'absent' => undef },
-    enable  => $nagios::server::ensure ? { 'present' => true, 'absent'      => undef },
+  service { $service_name:
+    ensure  => $ensure ? { 'present' => 'running', 'absent' => undef },
+    enable  => $ensure ? { 'present' => true,      'absent' => undef },
   }
 }

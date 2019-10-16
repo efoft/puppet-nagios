@@ -27,14 +27,6 @@ class nagios::params {
       $nrpe_include_dir   = '/etc/nrpe.d'
       # other
       $mysql_socket_path  = '/var/lib/mysql/mysql.sock'
-      # webpass encryption type (for nagios server only)
-      if $::apache_version {
-        $encryption = (versioncmp($::apache_version, '2.4') >= 0) ?
-        {
-          true  => 'bcrypt', # only supported with Apache 2.4+
-          false => 'sha'     # Apache 2.2
-        }
-      }
     }
     'windows': {
       #nscp
@@ -49,14 +41,7 @@ class nagios::params {
     }
   }
 
-  $admin_email            = 'nagiosadmin@localhost'
-  $admin_members          = ['nagiosadmin']
-  $check_ntp_remote_addr  = 'time.google.com'
-  $check_dns_resolve_name = 'google.com'
-
-  # nrpe.cfg
-  $nrpe_listen_port       = 5666
-  $nrpe_bind_address      = undef
-  $nrpe_allow_args        = true
-  $nrpe_debug             = false
+  # TODO: really needed here?
+  # commands
+  $nrpe_exec_timeout      = 30
 }

@@ -18,10 +18,10 @@ port = 5666
 alias_memory = check_memory "warn=free < 10%" "crit=free < 5%"
 alias_space = check_drivesize "warn=free < 10%" "crit=free < 5%" drive=* "filter=type in ('fixed') and mounted=1"
 alias_eventlog = check_eventlog <% @win_eventlog_files.each do | file | %>file=<%= file %> <% end %>  unique scan-range=-3h
-<% if @ext_scripts and !@ext_scripts.empty? -%>
+<% if @win_ext_scripts and !@win_ext_scripts.empty? -%>
 
 [/settings/external scripts/scripts]
-<% @ext_scripts.sort_by {|k,v| k}.each do |k,v| -%>
+<% @win_ext_scripts.sort_by {|k,v| k}.each do |k,v| -%>
 <%= k %>=<%= v['command'] %>
 <% end -%>
 <% end -%>

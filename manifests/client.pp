@@ -1,51 +1,14 @@
-# === Class nagios::client ===
-# Installs and configures nagios client on Linux and Windows.
 #
-# === Parameters ===
-# [*servers*]
-#   From where nrpe allows connections from. Can be IP addresses or resolvable hostnames.
-#   Can be single value or array.
+# @summary    Installs and configures nagios client on Linux and Windows.
 #
-# [*myip*]
-#   IP reachable from nagios server.
+# @param servers    From where nrpe allows connections from. Can be IP addresses or resolvable hostnames.
+# @param myip              IP reachable from nagios server.
+# @param nrpe_listen_port  Default: 5666
+# @param nrpe_bind_address If not set, 127.0.0.1 is used.
+# @param nrpe_allow_args   nrpe.cfg's dont_blame_nrpe param which allows args to be passed via check_nrpe.
+# @param nrpe_debug        Corresponds to nrpe.cfg debug parameter.
 #
-# [*site*]
-#   The value must be the same as for nagios server. This value is used for tagging exported resources.
-#   Default: domain fact
-#
-# [*contacts*]
-#   Optional. If not specified nagiosadmin is the only contact and administrator for this client host.
-#   Format is like the following (hiera format):
-#     admin1:
-#        alias: 'Admin 1'
-#        email: 'admin@example.com'
-#        password: admin1
-#     admin2:
-#       alias: 'Nagios Admin'
-#       email: 'nagios@localhost'
-#       password: admin2
-#   Once set they can log in into GUI and also they receive notification for the host they are specified as contacts.
-#
-# [*nrpe_listen_port*]
-#   Default: 5666
-#
-# [*nrpe_bind_address*]
-#   Address that nrpe should bind to in case there are more than one interface
-#   and you do not want nrpe to bind on all interfaces.
-#   If not set, 127.0.0.1 is used.
-#   Default: undef
-#
-# [*nrpe_allow_args*]
-#   Corresponds to nrpe.cfg dont_blame_nrpe parameter which allows arguments to be passed via nrpe_check.
-#
-# [*nrpe_debug*]
-#   Corresponds to nrpe.cfg debug parameter.
-#
-# [*defaultchecks*]
-#   Can be enabled or disabled at once for the client.
-#   Each of these checks can be disabled or enabled also individually.
-#
-# [*ext_scripts*]
+# @param win_ext_scripts
 #   Use of nsclient++ external scripts mechanism that allows to call external programs on client and return
 #   the result of their execution. We assume that executable itself is already in place.
 #   Hash should look like this (hiera format):
@@ -54,73 +17,15 @@
 #         command: "c:\\nagios\\check_intel_rst\\check_intel_rst.exe path=c:\\nagios\\check_intel_rst"
 #         use: generic-service
 #
-# All the rest parameters are swithes to specific checks and some params for them (like passwords).
-#
 class nagios::client(
-  Enum['present','absent'] $ensure       = 'present',
-  Variant[Array[String],String] $servers,
-  Stdlib::Ip::Address $myip              = $::ipaddress,
-  String $site                           = $::domain,
-  Hash $contacts                         = {},
-  Numeric $nrpe_listen_port              = $nagios::params::nrpe_listen_port,
-  Optional[String] $nrpe_bind_address    = $nagios::params::nrpe_bind_address,
-  Boolean $nrpe_allow_args               = $nagios::params::nrpe_allow_args,
-  Boolean $nrpe_debug                    = $nagios::params::nrpe_debug,
-  Boolean $defaultchecks                 = true,
-  # below are defaultchecks, can be disabled here individually
-  ## linux
-  Boolean $load                          = true,
-  Boolean $swap                          = true,
-  Boolean $procs                         = true,
-  Boolean $ntp                           = true,
-  Boolean $partitions                    = true,
-  Boolean $linux_raid                    = true,
-  Boolean $drbd                          = true,
-  Boolean $sensors                       = true,
-  Boolean $smart                         = true,
-  Enum['ide','scsi'] $smart_type         = 'ide',
-  Boolean $updates                       = true,
-  Boolean $ssh                           = true,
-  ## end of linux defaultchecks
-  ## windows
-  Boolean $win_cpu                       = true,
-  Boolean $win_memory                    = true,
-  Boolean $win_diskspace                 = true,
-  Boolean $win_eventlog                  = true,
-  Array[String] $win_eventlog_files      = ['system','application'],
-  ## end of windows defaultchecks
-  ## common checks
-  Boolean $smtp                          = false,
-  Boolean $imap                          = false,
-  Boolean $imaps                         = false,
-  Boolean $pop3                          = false,
-  Boolean $pop3s                         = false,
-  Boolean $http                          = false,
-  Boolean $bacula                        = false,
-  Optional[String] $bacula_pass          = undef,
-  Boolean $sip                           = false,
-  Optional[String] $sip_uri              = undef,
-  ## end of common checks
-  ## specific linux checks
-  Boolean $mysql_local                   = false,
-  Boolean $mysql_remote                  = false,
-  Boolean $mysql_repl                    = false,
-  String $mysql_user                     = 'nagios',
-  Optional[String] $mysql_pass           = undef,
-  Boolean $pgsql_local                   = false,
-  Boolean $pgsql_remote                  = false,
-  String $pgsql_user                     = 'nagios',
-  Optional[String] $pgsql_pass           = undef,
-  Boolean $mongo_local                   = false,
-  Boolean $mongo_remote                  = false,
-  ## end of specific linux checks
-  ## specific windows checks
-  Array $win_services                    = [],
-  Boolean $mssql_remote                  = false,
-  String $mssql_user                     = 'nagios',
-  Optional[String] $mssql_pass           = undef,
-  Hash $ext_scripts                      = {},
-  ## end of specific windows checks
+  Enum['present','absent']      $ensure            = 'present',
+  Array[String]                 $servers,
+  Stdlib::Ip::Address           $myip              = $::ipaddress,
+  Numeric                       $nrpe_listen_port  = 5666,
+  Optional[Stdlib::Ip::Address] $nrpe_bind_address = undef,
+  Boolean                       $nrpe_allow_args   = true,
+  Boolean                       $nrpe_debug        = false,
+  Hash                          $win_ext_scripts   = {},
 ) inherits ::nagios::params {
 
   # Install nrpe package
@@ -161,42 +66,5 @@ class nagios::client(
   service { $nrpe_service:
     ensure => $ensure ? { 'present' => 'running', 'absent' => undef },
     enable => $ensure ? { 'present' => true, 'absent'      => undef },
-  }
-
-  # If `contacts` parameter is used in host declaration, it must have
-  # a value otherwise it leaves this parameter in nagios cfg empty which leads to error.
-  # That's why we use nagiosadmin if nothing specified.
-  # It contacts are supplied, nagiosadmin is not added but nagiosadmin is always a contact
-  # since it's in admin contactgroup.
-  $contacts_list = inline_template("<% if @contacts %><%= @contacts.select {|key,value| !value.to_s.match(/absent/) }.keys.join(',') %><% end %>")
-  $host_contacts = empty($contacts_list) ? { true => 'nagiosadmin', false => $contacts_list }
-
-  # exported resources
-  tag $site
-
-  @@nagios_host { $::fqdn:
-    ensure   => $ensure,
-    alias    => $::hostname,
-    address  => $myip,
-    use      => $::kernel ? { 'Linux' => 'linux-server', 'Windows' => 'windows-server' },
-    contacts => $host_contacts,
-  }
-
-  if $ensure == 'present' {
-    create_resources(::nagios::admin, $contacts)
-
-    include "::nagios::client::checks::${::kernel}"
-    include ::nagios::client::checks::common
-
-    if $::kernel == 'Windows' and $ext_scripts {
-      $ext_scripts.each |$k,$v| {
-        nagios::client::service { $k:
-          command     => 'check_nrpe_nossl',
-          args        => "!${k}!''",
-          use         => $v['use'],
-          description => $v['description'],
-        }
-      }
-    }
   }
 }
