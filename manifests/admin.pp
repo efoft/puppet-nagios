@@ -7,9 +7,10 @@
 #
 define nagios::admin (
   Enum['present','absent'] $ensure    = 'present',
-  String                   $password,
+  String[1]                $username,
+  String[1]                $password,
   String                   $email,
-  Optional[String]         $alias     = undef,
+  Optional[String]         $aliasname = undef,             # because alias is metaparam
   String                   $use       = 'generic-contact',
 ) {
 
@@ -32,28 +33,35 @@ define nagios::admin (
   }
 
   if $ensure == 'present' {
-    exec { "update-${name}-to-passwd":
+    exec { "update-${username}-to-passwd":
       path    => $::path,
       command => $encryption ?
         {
-          'bcrypt' => "htpasswd -bB ${passwd_file} ${name} ${password}",
-          'sha'    => "htpasswd -bs ${passwd_file} ${name} ${password}"
+          'bcrypt' => "htpasswd -bB ${passwd_file} ${username} ${password}",
+          'sha'    => "htpasswd -bs ${passwd_file} ${username} ${password}"
         },
-      unless => "htpasswd -bv ${passwd_file} ${name} ${password}",
+      unless => "htpasswd -bv ${passwd_file} ${username} ${password}",
     }
   }
   else {
-    exec { "remove-${name}-from-passwd":
+    exec { "remove-${username}-from-passwd":
       path    => ['/usr/bin','/bin'],
-      command => "htpasswd -D ${passwd_file} ${name}",
-      onlyif  => "grep ${name} ${passwd_file}",
+      command => "htpasswd -D ${passwd_file} ${username}",
+      onlyif  => "grep ${username} ${passwd_file}",
     }
   }
 
-  nagios_contact { $name:
+  #nagios_contact { $name:
+  #  ensure => $ensure,
+  #  use    => $use,
+  #  alias  => $aliasname,
+  #  email  => $email,
+  #}
+
+  ensure_resource('nagios_contact', $username, {
     ensure => $ensure,
     use    => $use,
-    alias  => $alias,
+    alias  => $aliasname,
     email  => $email,
-  }
+  })
 }
