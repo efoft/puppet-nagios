@@ -14,6 +14,12 @@ define nagios::admin (
   String                   $use       = 'generic-contact',
 ) {
 
+  if $ensure == 'absent' {
+    notify { "Remove nagios user ${username} manually from passwd file then from hiera. Module nagios::admin cannot reliably remove it":
+      loglevel => warning,
+    }
+  }
+
   include nagios::server
   $passwd_file = $nagios::server::passwd_file
 
@@ -33,30 +39,17 @@ define nagios::admin (
   }
 
   if $ensure == 'present' {
-    exec { "update-${username}-to-passwd":
-      path    => $::path,
-      command => $encryption ?
-        {
-          'bcrypt' => "htpasswd -bB ${passwd_file} ${username} ${password}",
-          'sha'    => "htpasswd -bs ${passwd_file} ${username} ${password}"
-        },
-      unless => "htpasswd -bv ${passwd_file} ${username} ${password}",
-    }
-  }
-  else {
-    exec { "remove-${username}-from-passwd":
-      path    => ['/usr/bin','/bin'],
-      command => "htpasswd -D ${passwd_file} ${username}",
-      onlyif  => "grep ${username} ${passwd_file}",
-    }
-  }
 
-  #nagios_contact { $name:
-  #  ensure => $ensure,
-  #  use    => $use,
-  #  alias  => $aliasname,
-  #  email  => $email,
-  #}
+    ensure_resource('exec', "update-${username}-to-passwd", {
+      'path'    => $::path,
+      'command' => $encryption ?
+      {
+        'bcrypt' => "htpasswd -bB ${passwd_file} ${username} ${password}",
+        'sha'    => "htpasswd -bs ${passwd_file} ${username} ${password}"
+      },
+      'unless'  => "htpasswd -bv ${passwd_file} ${username} ${password}",
+    })
+  }
 
   ensure_resource('nagios_contact', $username, {
     ensure => $ensure,
