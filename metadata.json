@@ -1,6 +1,6 @@
 {
         "name": "efoft-nagios",
-        "version": "2.1.1",
+        "version": "2.1.2",
         "author": "efoft",
         "license": "Apache-2.0",
         "source": "https://github.com/efoft/puppet-bacula.git",
