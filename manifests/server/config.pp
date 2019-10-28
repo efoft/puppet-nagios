@@ -1,8 +1,6 @@
 #
 class nagios::server::config inherits nagios::server {
 
-  assert_private('This is private class')
-
   # Works great, but only if the "target" is the default (known limitation)
   resources { [
     'nagios_command',
@@ -29,17 +27,16 @@ class nagios::server::config inherits nagios::server {
     contain nagios::server::config::contacts
   }
 
-  File {
-    ensure => $ensure,
-    owner  => 'root',
-  }
-
   file { $nagios_cfg:
+    ensure  => $ensure,
+    owner   => 'root',
     content => template('nagios/nagios.cfg.erb'),
   }
 
   file { $managed_cfg_files:
-    group   => 'nagios',
-    mode    => '0640',
+    ensure => $ensure,
+    owner  => 'root',
+    group  => 'nagios',
+    mode   => '0640',
   }
 }

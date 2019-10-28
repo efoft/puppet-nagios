@@ -40,8 +40,4 @@ class nagios::params {
       fail('Sorry! Your OS is not supported')
     }
   }
-
-  # TODO: really needed here?
-  # commands
-  $nrpe_exec_timeout      = 30
 }

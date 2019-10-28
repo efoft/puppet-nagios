@@ -1,24 +1,23 @@
-# === Define nagios::plugin ===
-# Installs plugin on a server or a client.
+# @summary
+#   Installs plugin on a server or a client.
 #
-# === Parameters ===
-# [*source*]
+# @param source
 #   Can be 'package'(installed by yum) or 'script' (downloaded as file from puppet).
 #
-# [*script_name*]
+# @param script_name
 #   File name located under module's files folder to be transfered to a client.
 #
-# [*dep_packages*]
+# @param dep_packages
 #   Packages required to be install as dependencies. Usually is needed for script
 #   type plugins. Normal packages are installed with dependencies automatically via
 #   package manager.
 #
 define nagios::plugin (
-  Enum['present','absent'] $ensure = 'present',
-  Enum['package','script'] $source = 'package',
-  String $package_name             = "nagios-plugins-${title}",
-  String $script_name              = "check_${title}",
-  Array $dep_packages              = [],
+  Enum['present','absent'] $ensure       = 'present',
+  Enum['package','script'] $source       = 'package',
+  String                   $package_name = "nagios-plugins-${title}",
+  String                   $script_name  = "check_${title}",
+  Array                    $dep_packages = [],
 ) {
 
   if $source == 'package' {

@@ -3,8 +3,6 @@
 #
 # Password is updated each run.
 #
-# TODO: what if 2+ servers have the same contact
-#
 define nagios::admin (
   Enum['present','absent'] $ensure    = 'present',
   String[1]                $username,

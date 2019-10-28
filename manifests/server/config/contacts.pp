@@ -1,8 +1,6 @@
 #
 class nagios::server::config::contacts inherits nagios::server {
 
-  assert_private('This is private class')
-
   nagios::admin { 'nagiosadmin':
     username => 'nagiosadmin',
     alias    => 'Nagios Admin',
